@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
+import 'login_screen.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -43,14 +43,14 @@ class _GameScreenState extends State<GameScreen> {
           board[pos[0]] == board[pos[1]] &&
           board[pos[1]] == board[pos[2]]) {
         gameOver = true;
-        showResultDialog("Le Joueur '$currentPlayer' a gagné !");
+        showResultDialog("🎉 Le Joueur '$currentPlayer' a gagné !");
         return;
       }
     }
 
     if (!board.contains('')) {
       gameOver = true;
-      showResultDialog("Égalité !");
+      showResultDialog("🤝 Égalité !");
     }
   }
 
@@ -84,51 +84,64 @@ class _GameScreenState extends State<GameScreen> {
   void logout() async {
     final auth = AuthService();
     await auth.logout();
-    Navigator.pushReplacementNamed(context, '/');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tic Tac Toe - Joueur: X"),
+        title: Text("Tic Tac Toe - Joueur: $currentPlayer"),
         actions: [
-          IconButton(onPressed: logout, icon: const Icon(Icons.logout)),
+          IconButton(
+            onPressed: logout,
+            icon: const Icon(Icons.logout),
+            tooltip: "Déconnexion",
+          ),
         ],
       ),
+      backgroundColor: Colors.deepPurple.shade50,
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            GridView.builder(
-              shrinkWrap: true,
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: GridView.builder(
               itemCount: 9,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
               ),
-              itemBuilder: (_, index) => GestureDetector(
-                onTap: () => handleTap(index),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      board[index],
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => handleTap(index),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.deepPurple),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        board[index],
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: board[index] == 'X'
+                              ? Colors.deepPurple
+                              : Colors.orange,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
-          ],
+          ),
         ),
       ),
     );
